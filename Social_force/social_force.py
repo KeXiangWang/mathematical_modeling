@@ -42,6 +42,7 @@ def distance(people1, people2):
 
 class Model:
     def __init__(self, model_map, exit_list, people_list, wall_list):
+        print(exit_list)
         self.model_map = model_map
         self.exit_list = exit_list
         self.people_list = people_list
@@ -59,6 +60,7 @@ class Model:
         self.t_gap = 0.05  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
+        self.print_n = 0
 
     def a_star(self, start_point, end_point):
         start_x = round(start_point[0])
@@ -78,7 +80,8 @@ class Model:
         ca3 = [0, 0]
         for w in range(len(self.wall_list)):
             ca3 = ca3 + self.force_people_wall(i, w)
-        print("ca1: ", ca1, "ca2: ", ca2, "ca3: ", ca3)
+        if self.print_n:
+            print("ca1: ", ca1, "ca2: ", ca2, "ca3: ", ca3)
         return (ca1 + ca2 + ca3) / self.mass
 
     def force_people_people(self, i, j):
@@ -122,16 +125,21 @@ class Model:
                     min_length = len(d)
                     e = d
             a = self.accelerate(i, e)
-            print(i, "th:" " accelerate:", a)
-            print("old_p: ", self.people_list[i])
-            print("old_v: ", self.velocity_list[i])
+            if self.print_n:
+                print(i, "th:" " accelerate:", a)
+                print("old_p: ", self.people_list[i])
+                print("old_v: ", self.velocity_list[i])
             new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[
                 i] + 0.5 * a * self.t_gap ** 2)  # v0t + 1/2 * a * t**2
-            print("new_p: ", new_people_list[i])
+            if self.print_n:
+                print("new_p: ", new_people_list[i])
             new_velocity_list.append(self.t_gap * a + self.velocity_list[i])  # at + v0
-            print("new_v: ", new_velocity_list[i])
-            if [round(new_people_list[i][0]), round(new_people_list[i][1])] in self.exit_list:
-                arrive_list.append(i)
+            if self.print_n:
+                print("new_v: ", new_velocity_list[i])
+            for x,y in self.exit_list:
+                if x == round(new_people_list[i][0]) and y == round(new_people_list[i][1]):
+                    print([round(new_people_list[i][0]), round(new_people_list[i][1])])
+                    arrive_list.append(i)
         arrive_people_list = self.people_list[arrive_list]
         new_people_list = np.array(new_people_list)
         new_velocity_list = np.array(new_velocity_list)
@@ -139,4 +147,3 @@ class Model:
         # self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
         self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
         return self.people_list, arrive_people_list, arrive_list
-
