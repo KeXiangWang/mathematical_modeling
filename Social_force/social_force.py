@@ -57,7 +57,7 @@ class Model:
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
         self.radius = 0.3 * self.const_number  # units of measurement: dm
-        self.t_gap = 0.05  # units of measurement: s
+        self.t_gap = 0.005  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
         self.print_n = 0
