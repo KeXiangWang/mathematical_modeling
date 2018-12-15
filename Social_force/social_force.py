@@ -57,10 +57,12 @@ class Model:
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
         self.radius = 0.3 * self.const_number  # units of measurement: dm
+        self.radius_wall = 0.15 * self.const_number  # units of measurement: dm
         self.t_gap = 0.005  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
         self.print_n = 0
+        self.easy_model = 0
 
     def a_star(self, start_point, end_point):
         start_x = round(start_point[0])
@@ -98,7 +100,7 @@ class Model:
         return ca3 + ca4
 
     def force_people_wall(self, i, w):
-        r_iw = self.radius + 0
+        r_iw = self.radius + self.radius_wall
         d_iw = distance(self.people_list[i], self.wall_list[w])
         ca1 = self.A_i * math.exp(r_iw - d_iw / self.B_i)
         g = 0 if (d_iw > r_iw) else (r_iw - d_iw)
@@ -117,13 +119,15 @@ class Model:
         new_people_list = []
         for i in range(len(self.people_list)):
             min_length = 99999999999
-            e = [0, 0]
-
-            for j in range(len(self.exit_list)):
-                d = self.a_star(self.people_list[i], self.exit_list[j])
-                if len(d) < min_length:
-                    min_length = len(d)
-                    e = d
+            if self.easy_model:
+                e = self.a_star(self.people_list[i], self.exit_list[4])
+            else:
+                e = [0, 0]
+                for j in range(len(self.exit_list)):
+                    d = self.a_star(self.people_list[i], self.exit_list[j])
+                    if len(d) < min_length:
+                        min_length = len(d)
+                        e = d
             a = self.accelerate(i, e)
             if self.print_n:
                 print(i, "th:" " accelerate:", a)
@@ -136,7 +140,7 @@ class Model:
             new_velocity_list.append(self.t_gap * a + self.velocity_list[i])  # at + v0
             if self.print_n:
                 print("new_v: ", new_velocity_list[i])
-            for x,y in self.exit_list:
+            for x, y in self.exit_list:
                 if x == round(new_people_list[i][0]) and y == round(new_people_list[i][1]):
                     print([round(new_people_list[i][0]), round(new_people_list[i][1])])
                     arrive_list.append(i)
