@@ -5,7 +5,7 @@ import math
 
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
     model_map = np.ones(shape=(sizeX, sizeY))
-    model_map[1:(sizeX-1), 1:(sizeY-1)] = 0  # wall
+    model_map[1:(sizeX - 1), 1:(sizeY - 1)] = 0  # wall
     # a = np.random.randint(0, 50, size=(1, 2))
     # model_map[a] = 1  # random table
     for w in wall_describe:
@@ -78,6 +78,7 @@ class Model:
         ca3 = [0, 0]
         for w in range(len(self.wall_list)):
             ca3 = ca3 + self.force_people_wall(i, w)
+        print("ca1: ", ca1, "ca2: ", ca2, "ca3: ", ca3)
         return (ca1 + ca2 + ca3) / self.mass
 
     def force_people_people(self, i, j):
@@ -114,24 +115,28 @@ class Model:
         for i in range(len(self.people_list)):
             min_length = 99999999999
             e = [0, 0]
-            # print(i)
+
             for j in range(len(self.exit_list)):
                 d = self.a_star(self.people_list[i], self.exit_list[j])
                 if len(d) < min_length:
                     min_length = len(d)
                     e = d
             a = self.accelerate(i, e)
-            print("a: ", a)
+            print(i, "th:" " accelerate:", a)
             print("old_p: ", self.people_list[i])
+            print("old_v: ", self.velocity_list[i])
             new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[
                 i] + 0.5 * a * self.t_gap ** 2)  # v0t + 1/2 * a * t**2
             print("new_p: ", new_people_list[i])
             new_velocity_list.append(self.t_gap * a + self.velocity_list[i])  # at + v0
+            print("new_v: ", new_velocity_list[i])
             if [round(new_people_list[i][0]), round(new_people_list[i][1])] in self.exit_list:
                 arrive_list.append(i)
         arrive_people_list = self.people_list[arrive_list]
         new_people_list = np.array(new_people_list)
         new_velocity_list = np.array(new_velocity_list)
         self.people_list = np.delete(new_people_list, arrive_list, axis=0)
-        self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
+        # self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
+        self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
         return self.people_list, arrive_people_list, arrive_list
+
