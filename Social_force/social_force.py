@@ -3,30 +3,35 @@ import A_star
 import math
 
 
-def create_map_people_wall():
-    model_map = np.ones(shape=(200, 200))
-    model_map[1:199, 1:199] = 0  # wall
+def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
+    model_map = np.ones(shape=(sizeX, sizeY))
+    model_map[1:(sizeX-1), 1:(sizeY-1)] = 0  # wall
     # a = np.random.randint(0, 50, size=(1, 2))
     # model_map[a] = 1  # random table
-    model_map[100, 1:160] = 1
-    exit_list = [[199, 100], [199, 101]]
-    for x, y in exit_list:
+    for w in wall_describe:
+        model_map[w[0]:w[1], w[2]:w[3]] = 1
+
+    # model_map[100, 1:160] = 1
+    # exit_list = [[199, 100], [199, 101]]
+    for x, y in exit_describe:
         model_map[x][y] = 0
-    people_list = []
-    for i in range(5):
-        p = [i * 5 + 25, 50]
-        if model_map[round(p[0])][round(p[1])] == 1:
-            continue
-        people_list.append(p)
+    if people_describe == []:
+        # random
+        print('wrong')
+    # people_list = []
+    # for i in range(5):
+    #     p = [i * 5 + 25, 50]
+    #     if model_map[round(p[0])][round(p[1])] == 1:
+    #         continue
+    #     people_list.append(p)
     wall_list = []
     for i in range(model_map.shape[0]):
         for j in range(model_map.shape[1]):
             if model_map[i][j] == 1:
                 wall_list.append([i, j])
-                # model_map[i][j] = 0
     model_map = np.array(model_map)
-    exit_list = np.array(exit_list)
-    people_list = np.array(people_list, dtype=np.double)
+    exit_list = np.array(exit_describe)
+    people_list = np.array(people_describe, dtype=np.double)
     wall_list = np.array(wall_list)
     return [model_map, exit_list, people_list, wall_list]
 
@@ -129,4 +134,4 @@ class Model:
         new_velocity_list = np.array(new_velocity_list)
         self.people_list = np.delete(new_people_list, arrive_list, axis=0)
         self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
-        return self.people_list, arrive_people_list
+        return self.people_list, arrive_people_list, arrive_list
