@@ -15,7 +15,7 @@ class Gui(QWidget):
         def initPeople():     
             self.peopleList = []       
             image = QPixmap()  
-            image.load("resources/1.png") 
+            image.load("1.png")
             for p in people_list:
                 label = QLabel(self)
                 px = p[1] * self.sizePerPoint + self.paintX0
