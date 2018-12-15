@@ -1,7 +1,7 @@
 import social_force
-import sys, os, time
-from PyQt5.QtCore import Qt, QPropertyAnimation, QTimer
-from PyQt5.QtWidgets import (QWidget, QApplication, QLabel)
+import sys
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton)
 from PyQt5.QtGui import QPainter, QColor, QBrush, QPixmap
 import numpy as np
 
@@ -38,8 +38,10 @@ class Gui(QWidget):
         self.timer.timeout.connect(self.updateModel)
         self.time = 0
         self.timeInterval = 50
+        self.runState = 0
+        self.timerInterval = 0 # 50
         self.initUI()
-        self.timer.start(1000)
+        # self.timer.start(1000)
 
     def initUI(self):
         self.setGeometry(530, 220, 810, 540)
@@ -47,12 +49,21 @@ class Gui(QWidget):
         self.setWindowTitle('mathematical modeling')
 
         self.timeLabel = QLabel(self)
-        self.timeLabel.setGeometry(50, 20, 150, 70)
-        self.timeLabel.setStyleSheet("QLabel{background:white;}")
+        self.timeLabel.setGeometry(60, 60, 150, 70)
+        self.timeLabel.setText('1.34')
+        self.timeLabel.setAlignment(Qt.AlignCenter)
+        self.timeLabel.setStyleSheet("QLabel{background:white;font:20pt 'times new roman'}")
+        self.stepButton = QPushButton('STEP', self)
+        self.stepButton.setGeometry(65, 185, 140, 65)
+        self.stepButton.setStyleSheet("QPushButton{font:18pt 'times new roman'}")
+        self.stepButton.clicked.connect(self.step)
+        self.stepButton = QPushButton('RUN', self)
+        self.stepButton.setGeometry(65, 275, 140, 65)
+        self.stepButton.setStyleSheet("QPushButton{font:18pt 'times new roman'}")
+        self.stepButton.clicked.connect(self.run)
         self.show()
 
     def updateModel(self):
-        print('here')
         self.time += self.timeInterval
         self.timeLabel.setText(str(self.time / 1000))
         pList, apList, aNum = self.model.update()
@@ -66,10 +77,10 @@ class Gui(QWidget):
             px = pList[i][1] * self.sizePerPoint + self.paintX0
             py = pList[i][0] * self.sizePerPoint + self.paintY0
             self.peopleList[i].move(px, py)
-        if (self.peopleList == []):
-            self.timer.stop()
+        if (self.peopleList != [] and self.runState):
+            self.timer.start(self.timerInterval)
         else:
-            self.timer.start(50)
+            self.timer.stop()
 
     def paintEvent(self, event):
         def drawWall(painter):
@@ -78,17 +89,31 @@ class Gui(QWidget):
                 dy = y * self.sizePerPoint + self.paintY0
                 painter.setBrush(Qt.black)
                 painter.drawRect(dx, dy, self.sizePerPoint, self.sizePerPoint)
-            
+
             painter.setPen(Qt.black)
             for i in range(self.mapSize[0]):
                 for j in range(self.mapSize[1]):
                     if self.modelMap[i][j] == 1:
                         oneWall(j, i, painter)
-        
+
         painter = QPainter()
         painter.begin(self)
         drawWall(painter)
-    
+
+    def step(self):
+        if (self.runState != 1):
+            self.timer.start(self.timerInterval)
+
+    def run(self):
+        sender = self.sender()
+        if (sender.text() == "RUN"):
+            sender.setText("PAUSE")
+            self.runState = 1
+            self.timer.start(self.timerInterval)
+        else:
+            sender.setText("RUN")
+            self.runState = 0
+
 
 if __name__ == '__main__':
     
