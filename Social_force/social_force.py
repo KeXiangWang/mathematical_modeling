@@ -53,46 +53,62 @@ class Model:
         self.const_number = 10
         self.velocity_i_0 = 0.8 * self.const_number  # units of measurement: dm/s
         self.A_i = 2000  # units of measurement: N
-        self.B_i = 0.08 * self.const_number  # units of measurement: dm
+        self.B_i = 0.08  # units of measurement: m
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
-        self.radius = 0.3 * self.const_number  # units of measurement: dm
-        self.radius_wall = 0.15 * self.const_number  # units of measurement: dm
+        self.radius = 0.1 * self.const_number  # units of measurement: dm
+        self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
         self.t_gap = 0.005  # units of measurement: s
         self.mass = 80  # units of measurement: kg
-        self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
-        self.print_n = 0
-        self.easy_model = 0
+        # self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
+        self.velocity_list[0:len(people_list), 0:2] = 0
+        self.print_n = 1
+        self.easy_model = 1
 
     def a_star(self, start_point, end_point):
         start_x = round(start_point[0])
         start_y = round(start_point[1])
-        astar = A_star.A_star(self.model_map, start_x, start_y, end_point[0], end_point[1])
+        temp_map = np.zeros([50, 50])
+        for i in range(len(self.wall_list)):
+            for j in range(-2, 3):
+                if self.wall_list[i][0] + j < 0 or self.wall_list[i][0] + j >= 50:
+                    continue
+                for k in range(-2, 3):
+                    if self.wall_list[i][1] + k < 0 or self.wall_list[i][1] + k >= 50:
+                        continue
+                    for x, y in self.exit_list:
+                        if self.wall_list[i][0] + j == x and self.wall_list[i][1] + k == y:
+                            continue
+                    temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
+        astar = A_star.A_star(temp_map, start_x, start_y, end_point[0], end_point[1])
         path = np.array(astar.get_path())
         # print(path)
         return path[0]
 
     def accelerate(self, i, e):
         ca1 = self.mass * (
-                self.velocity_i_0 * e - self.velocity_list[i]) / self.t_gap
+                self.velocity_i_0 * e - self.velocity_list[i]) / self.t_gap / self.const_number
         ca2 = [0, 0]
         for j in range(len(self.people_list)):
             if i != j:
                 ca2 = ca2 + self.force_people_people(i, j)
         ca3 = [0, 0]
         for w in range(len(self.wall_list)):
-            ca3 = ca3 + self.force_people_wall(i, w)
+            c = self.force_people_wall(i, w)
+            # if c[1] > 0.1:
+            ca3 = ca3 + c
+            # print(self.wall_list[w], c)
         if self.print_n:
             print("ca1: ", ca1, "ca2: ", ca2, "ca3: ", ca3)
         return (ca1 + ca2 + ca3) / self.mass
 
     def force_people_people(self, i, j):
-        r_ij = self.radius + self.radius
-        d_ij = distance(self.people_list[i], self.people_list[j])
+        r_ij = (self.radius + self.radius) / self.const_number
+        d_ij = distance(self.people_list[i], self.people_list[j]) / self.const_number
         ca1 = self.A_i * math.exp(r_ij - d_ij / self.B_i)
         g = 0 if (d_ij > r_ij) else (r_ij - d_ij)
         ca2 = self.k * g
-        n_ij = (self.people_list[i] - self.people_list[j]) / d_ij
+        n_ij = (self.people_list[i] - self.people_list[j]) / self.const_number / d_ij
         ca3 = (ca1 + ca2) * n_ij
         t_ij = [-n_ij[1], n_ij[0]]
         delta_v_ji = (self.velocity_list[j] - self.velocity_list[i]) * t_ij
@@ -100,17 +116,19 @@ class Model:
         return ca3 + ca4
 
     def force_people_wall(self, i, w):
-        r_iw = self.radius + self.radius_wall
-        d_iw = distance(self.people_list[i], self.wall_list[w])
+        r_iw = (self.radius + self.radius_wall) / self.const_number
+        d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
         ca1 = self.A_i * math.exp(r_iw - d_iw / self.B_i)
         g = 0 if (d_iw > r_iw) else (r_iw - d_iw)
         ca2 = self.k * g
-        n_iw = (self.people_list[i] - self.wall_list[w]) / d_iw
+        n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
         ca3 = (ca1 + ca2) * n_iw
         t_iw = [-n_iw[1], n_iw[0]]
         delta_v_wi = (0 - self.velocity_list[i]) * t_iw
         ca4 = self.k_body_effect_coefficient * g * delta_v_wi * (
                 self.velocity_list[i][0] * t_iw[0] + self.velocity_list[i][1] * t_iw[1]) * t_iw
+        # if abs(ca3[0]) > 1:
+        #     print("ca1 ", ca1, "ca2 ", ca2, "ca3 ", ca3, "n  ", n_iw, "d ", d_iw)
         return ca3 + ca4
 
     def update(self):
@@ -128,9 +146,9 @@ class Model:
                     if len(d) < min_length:
                         min_length = len(d)
                         e = d
-            a = self.accelerate(i, e)
+            a = self.accelerate(i, e) * self.const_number
             if self.print_n:
-                print(i, "th:" " accelerate:", a)
+                print(i, "th:", " accelerate:", a, "e: ", e)
                 print("old_p: ", self.people_list[i])
                 print("old_v: ", self.velocity_list[i])
             new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[
@@ -148,6 +166,6 @@ class Model:
         new_people_list = np.array(new_people_list)
         new_velocity_list = np.array(new_velocity_list)
         self.people_list = np.delete(new_people_list, arrive_list, axis=0)
-        # self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
-        self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
+        self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
+        # self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
         return self.people_list, arrive_people_list, arrive_list

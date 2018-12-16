@@ -19,6 +19,7 @@ if __name__ == "__main__":
     sys.exit(APP.exec_())
 
     # model = social_force.Model(model_map, exit_list, people_list, wall_list)
+    # model.a_star(people_list[3], exitDescribe[0])
     #
     # for i in range(20):
     #     people_list, people_arrive_list, _ = model.update()
