@@ -56,31 +56,33 @@ class Model:
         self.B_i = 0.08  # units of measurement: m
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
-        self.radius = 0.2 * self.const_number  # units of measurement: dm
-        self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
-        self.t_gap = 0.005  # units of measurement: s
+        self.radius = 0.3 * self.const_number  # units of measurement: dm
+        self.radius_wall = 0.1 * self.const_number  # units of measurement: dm
+        self.t_gap = 0.01  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         # self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
         self.velocity_list[0:len(people_list), 0:2] = 0
         self.print_n = 1
         self.easy_model = 1
-
-    def a_star(self, start_point, end_point):
-        start_x = round(start_point[0])
-        start_y = round(start_point[1])
-        temp_map = np.zeros([50, 50])
+        self.temp_map = np.zeros([50, 50])
+        self.temp_wall_list = []
         for i in range(len(self.wall_list)):
-            for j in range(-2, 3):
+            for j in range(-3, 4):
                 if self.wall_list[i][0] + j < 0 or self.wall_list[i][0] + j >= 50:
                     continue
-                for k in range(-2, 3):
+                for k in range(-3, 4):
                     if self.wall_list[i][1] + k < 0 or self.wall_list[i][1] + k >= 50:
                         continue
                     for x, y in self.exit_list:
                         if self.wall_list[i][0] + j == x and self.wall_list[i][1] + k == y:
                             continue
-                    temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
-        astar = A_star.A_star(temp_map, start_x, start_y, end_point[0], end_point[1])
+                    self.temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
+                    self.temp_wall_list.append([self.wall_list[i][0] + j, self.wall_list[i][1] + k])
+
+    def a_star(self, start_point, end_point):
+        start_x = round(start_point[0])
+        start_y = round(start_point[1])
+        astar = A_star.A_star(self.temp_map, start_x, start_y, end_point[0], end_point[1])
         path = np.array(astar.get_path())
         # print(path)
         return path[0]
@@ -131,6 +133,12 @@ class Model:
         #     print("ca1 ", ca1, "ca2 ", ca2, "ca3 ", ca3, "n  ", n_iw, "d ", d_iw)
         return ca3 + ca4
 
+    def touch_wall(self, loc):
+        for x, y in self.temp_wall_list:
+            if round(loc[0]) == x and round(loc[1]) == y:
+                return [round(loc[0]) == x, round(loc[1]) == y]
+        return [False, False]
+
     def update(self):
         arrive_list = []
         new_velocity_list = []
@@ -147,16 +155,24 @@ class Model:
                         min_length = len(d)
                         e = d
             a = self.accelerate(i, e) * self.const_number
-            if self.print_n:
+            print_n = self.print_n and i == 3
+            if print_n:
                 print(i, "th:", " accelerate:", a, "e: ", e)
                 print("old_p: ", self.people_list[i])
                 print("old_v: ", self.velocity_list[i])
+
             new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[
                 i] + 0.5 * a * self.t_gap ** 2)  # v0t + 1/2 * a * t**2
-            if self.print_n:
+            touch_x, touch_y = self.touch_wall(new_people_list[i])
+            if touch_x:
+                new_people_list[i][0] = self.people_list[i][0]
+            if touch_y:
+                new_people_list[i][1] = self.people_list[i][1]
+
+            if print_n:
                 print("new_p: ", new_people_list[i])
             new_velocity_list.append(self.t_gap * a + self.velocity_list[i])  # at + v0
-            if self.print_n:
+            if print_n:
                 print("new_v: ", new_velocity_list[i])
             for x, y in self.exit_list:
                 if x == round(new_people_list[i][0]) and y == round(new_people_list[i][1]):
