@@ -56,7 +56,7 @@ class Model:
         self.B_i = 0.08  # units of measurement: m
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
-        self.radius = 0.1 * self.const_number  # units of measurement: dm
+        self.radius = 0.2 * self.const_number  # units of measurement: dm
         self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
         self.t_gap = 0.005  # units of measurement: s
         self.mass = 80  # units of measurement: kg
