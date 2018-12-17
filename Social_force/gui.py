@@ -14,8 +14,8 @@ class Gui(QWidget):
             self.paintY0 = (500 - self.sizePerPoint * self.mapSize[0]) / 2 + self.startY0
             print(self.paintX0, self.paintY0)
         def initPeople():     
-            self.peopleList = []       
-            image = QPixmap()  
+            self.peopleList = []
+            image = QPixmap()
             image.load("1.png")
             for p in people_list:
                 label = QLabel(self)
@@ -38,7 +38,7 @@ class Gui(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateModel)
         self.time = 0
-        self.timeInterval = 5
+        self.timeInterval = 50
         self.runState = 0
         self.timerInterval = 5 # 50
         self.initUI()

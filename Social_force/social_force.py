@@ -57,8 +57,8 @@ class Model:
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
         self.radius = 0.2 * self.const_number  # units of measurement: dm
-        self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
-        self.t_gap = 0.005  # units of measurement: s
+        self.radius_wall = 0.08 * self.const_number  # units of measurement: dm
+        self.t_gap = 0.05  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         # self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
         self.velocity_list[0:len(people_list), 0:2] = 0
@@ -66,8 +66,8 @@ class Model:
         self.easy_model = 1
 
     def a_star(self, start_point, end_point):
-        start_x = round(start_point[0])
-        start_y = round(start_point[1])
+        start_x = math.floor(start_point[0])
+        start_y = math.floor(start_point[1])
         temp_map = np.zeros([50, 50])
         for i in range(len(self.wall_list)):
             for j in range(-2, 3):
@@ -105,7 +105,7 @@ class Model:
     def force_people_people(self, i, j):
         r_ij = (self.radius + self.radius) / self.const_number
         d_ij = distance(self.people_list[i], self.people_list[j]) / self.const_number
-        ca1 = self.A_i * math.exp(r_ij - d_ij / self.B_i)
+        ca1 = self.A_i * math.exp((r_ij - d_ij) / self.B_i)
         g = 0 if (d_ij > r_ij) else (r_ij - d_ij)
         ca2 = self.k * g
         n_ij = (self.people_list[i] - self.people_list[j]) / self.const_number / d_ij
@@ -118,7 +118,7 @@ class Model:
     def force_people_wall(self, i, w):
         r_iw = (self.radius + self.radius_wall) / self.const_number
         d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
-        ca1 = self.A_i * math.exp(r_iw - d_iw / self.B_i)
+        ca1 = self.A_i * math.exp((r_iw - d_iw) / self.B_i)
         g = 0 if (d_iw > r_iw) else (r_iw - d_iw)
         ca2 = self.k * g
         n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw

@@ -1,3 +1,5 @@
+import math
+
 map_width = 0
 map_height = 0
 
@@ -118,7 +120,7 @@ class A_star(object):
                 self.open_list[(a.x, a.y)] = a
             else:  # 如果存在在open_list中，通过G值判断这个点是否更近
                 exist_node = self.open_list[(a.x, a.y)]
-                new_g = node.G + 1
+                new_g = node.G + math.sqrt((a.x - node.x)**2 +  (a.y - node.y)**2)
                 if new_g < exist_node.G:
                     exist_node.reset_father(node, new_g)
         return False
