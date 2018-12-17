@@ -21,7 +21,7 @@ def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_de
     # people_list = []
     # for i in range(5):
     #     p = [i * 5 + 25, 50]
-    #     if model_map[round(p[0])][round(p[1])] == 1:
+    #     if model_map[math.floor(p[0])][math.floor(p[1])] == 1:
     #         continue
     #     people_list.append(p)
     wall_list = []
@@ -57,7 +57,7 @@ class Model:
         self.k = 1.2 * 10 ** 5  # units of measurement: kg(s**-2)
         self.k_body_effect_coefficient = 2.4 * 10 ** 5 / self.const_number  # units of measurement: kg(dm**-1)(s**-1)
         self.radius = 0.2 * self.const_number  # units of measurement: dm
-        self.radius_wall = 0.08 * self.const_number  # units of measurement: dm
+        self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
         self.t_gap = 0.05  # units of measurement: s
         self.mass = 80  # units of measurement: kg
         # self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
@@ -68,22 +68,22 @@ class Model:
     def a_star(self, start_point, end_point):
         start_x = math.floor(start_point[0])
         start_y = math.floor(start_point[1])
-        self.temp_map = np.zeros([50, 50])
-        self.temp_wall_list = []
-        for i in range(len(self.wall_list)):
-            for j in range(-2, 3):
-                if self.wall_list[i][0] + j < 0 or self.wall_list[i][0] + j >= 50:
-                    continue
-                for k in range(-2, 3):
-                    if self.wall_list[i][1] + k < 0 or self.wall_list[i][1] + k >= 50:
-                        continue
-                    for x, y in self.exit_list:
-                        if self.wall_list[i][0] + j == x and self.wall_list[i][1] + k == y:
-                            continue
-                    self.temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
-                    self.temp_wall_list.append([self.wall_list[i][0] + j, self.wall_list[i][1] + k])
+        # self.temp_map = np.zeros([50, 50])
+        # self.temp_wall_list = []
+        # for i in range(len(self.wall_list)):
+        #     for j in range(-2, 3):
+        #         if self.wall_list[i][0] + j < 0 or self.wall_list[i][0] + j >= 50:
+        #             continue
+        #         for k in range(-2, 3):
+        #             if self.wall_list[i][1] + k < 0 or self.wall_list[i][1] + k >= 50:
+        #                 continue
+        #             for x, y in self.exit_list:
+        #                 if self.wall_list[i][0] + j == x and self.wall_list[i][1] + k == y:
+        #                     continue
+        #             self.temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
+        #             self.temp_wall_list.append([self.wall_list[i][0] + j, self.wall_list[i][1] + k])
 
-        astar = A_star.A_star(self.temp_map, start_x, start_y, end_point[0], end_point[1])
+        astar = A_star.A_star(self.model_map, start_x, start_y, end_point[0], end_point[1])
         path = np.array(astar.get_path())
         # print(path)
         return path[0]
@@ -136,8 +136,8 @@ class Model:
 
     # def touch_wall(self, loc):
     #     for x, y in self.temp_wall_list:
-    #         if round(loc[0]) == x and round(loc[1]) == y:
-    #             return [round(loc[0]) == x, round(loc[1]) == y]
+    #         if math.floor(loc[0]) == x and math.floor(loc[1]) == y:
+    #             return [math.floor(loc[0]) == x, math.floor(loc[1]) == y]
     #     return [False, False]
 
     def update(self):
@@ -176,8 +176,8 @@ class Model:
             if print_n:
                 print("new_v: ", new_velocity_list[i])
             for x, y in self.exit_list:
-                if x == round(new_people_list[i][0]) and y == round(new_people_list[i][1]):
-                    print([round(new_people_list[i][0]), round(new_people_list[i][1])])
+                if x == math.floor(new_people_list[i][0]) and y == math.floor(new_people_list[i][1]):
+                    print([math.floor(new_people_list[i][0]), math.floor(new_people_list[i][1])])
                     arrive_list.append(i)
         arrive_people_list = self.people_list[arrive_list]
         new_people_list = np.array(new_people_list)
