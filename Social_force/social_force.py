@@ -127,7 +127,7 @@ class Model:
         r_ij = (self.radius + self.radius) / self.const_number
         d_ij = distance(self.people_list[i], self.people_list[j]) / self.const_number
         ca1 = self.A_i * math.exp((r_ij - d_ij) / self.B_i)
-        g = 0 if (d_ij > r_ij) else (r_ij - d_ij)
+        g = 0
         ca2 = self.k * g
         n_ij = (self.people_list[i] - self.people_list[j]) / self.const_number / d_ij
         ca3 = (ca1 + ca2) * n_ij
@@ -140,7 +140,7 @@ class Model:
         r_iw = (self.radius + self.radius_wall) / self.const_number
         d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
         ca1 = self.A_i * math.exp((r_iw - d_iw) / self.B_i)
-        g = 0 if (d_iw > r_iw) else (r_iw - d_iw)
+        g = 0
         ca2 = self.k * g
         n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
         ca3 = (ca1 + ca2) * n_iw
