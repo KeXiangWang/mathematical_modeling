@@ -10,11 +10,11 @@ class simpleNet(nn.Module):
     def __init__(self, in_dim, n_hidden_1, n_hidden_2, out_dim):
         super(simpleNet, self).__init__()
         self.in_dim = in_dim
-        self.layer1 = nn.Sequential(nn.Linear(in_dim, n_hidden_1), nn.BatchNormld(n_hidden_1), nn.ReLU(True))
-        self.layer2 = nn.Sequential(nn.Linear(n_hidden_1, n_hidden_2), nn.BatchNormld(n_hidden_2), nn.ReLU(True))
+        self.layer1 = nn.Sequential(nn.Linear(in_dim, n_hidden_1), nn.BatchNorm1d(n_hidden_1), nn.ReLU(True))
+        self.layer2 = nn.Sequential(nn.Linear(n_hidden_1, n_hidden_2), nn.BatchNorm1d(n_hidden_2), nn.ReLU(True))
         self.layer3 = nn.Linear(n_hidden_2, out_dim)
 
-    def forword(self, x):
+    def forward(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     x_train = torch.from_numpy(train_x)
     y_train = torch.from_numpy(train_y)
 
-    if torch.cude.is_available():
+    if torch.cuda.is_available():
         module = simpleNet(22, 110, 110, 2).cuda()
     else:
         module = simpleNet(22, 110, 110, 2)
@@ -38,16 +38,15 @@ if __name__ == '__main__':
     criterion = nn.MSELoss()
     optimizer = optim.SGD(module.parameters(), lr=1e-3)
 
-    num_epoch = 1000
+    num_epoch = 10000
     for epoch in range(num_epoch):
         if torch.cuda.is_available():
-            input = Variable(x_train).cuda()
+            input1 = Variable(x_train).cuda()
             target = Variable(y_train).cuda()
         else:
-            input = Variable(x_train)
+            input1 = Variable(x_train)
             target = Variable(y_train)
-
-        out = module(input)
+        out = module(input1)
         loss = criterion(out, target)
 
         optimizer.zero_grad()
