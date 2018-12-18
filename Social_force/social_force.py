@@ -2,7 +2,7 @@ import numpy as np
 import A_star
 import math
 import os
-
+from tqdm import tqdm
 
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
     model_map = np.ones(shape=(sizeX, sizeY))
@@ -43,7 +43,7 @@ def distance(people1, people2):
 
 class Model:
     def __init__(self, model_map, exit_list, people_list, wall_list, a_star_map_name):
-        print(exit_list)
+        # print(exit_list)
         self.model_map = model_map
         self.exit_list = exit_list
         self.people_list = people_list
@@ -63,7 +63,7 @@ class Model:
         self.mass = 80  # units of measurement: kg
         self.velocity_list[0:len(people_list), 0:2] = 0
         # parameters for control
-        self.print_n = 1
+        self.print_n = 0
         self.easy_model = 1
         # a_star_map preset
         if os.path.isfile(a_star_map_name):
@@ -72,7 +72,7 @@ class Model:
         else:
             self.a_star_map = np.zeros(shape=(self.map_height, self.map_width, 2))
             # a = np.zeros(shape=(self.map_height, self.map_width)) # for observing
-            for x in range(self.map_height):
+            for x in tqdm(range(self.map_height)):
                 for y in range(self.map_width):
                     if model_map[x][y] == 1:
                         continue
