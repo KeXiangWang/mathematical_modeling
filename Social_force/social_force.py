@@ -1,6 +1,7 @@
 import numpy as np
 import A_star
 import math
+import os
 
 
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
@@ -41,7 +42,7 @@ def distance(people1, people2):
 
 
 class Model:
-    def __init__(self, model_map, exit_list, people_list, wall_list):
+    def __init__(self, model_map, exit_list, people_list, wall_list, a_star_map_name):
         print(exit_list)
         self.model_map = model_map
         self.exit_list = exit_list
@@ -60,10 +61,27 @@ class Model:
         self.radius_wall = 0.05 * self.const_number  # units of measurement: dm
         self.t_gap = 0.05  # units of measurement: s
         self.mass = 80  # units of measurement: kg
-        # self.velocity_list[0:len(people_list), 0:2] = self.velocity_i_0
         self.velocity_list[0:len(people_list), 0:2] = 0
+        # parameters for control
         self.print_n = 1
         self.easy_model = 1
+        # a_star_map preset
+        if os.path.isfile(a_star_map_name):
+            self.a_star_map = np.load(a_star_map_name)
+            print("Loaded the preset a_star_map")
+        else:
+            self.a_star_map = np.zeros(shape=(self.map_height, self.map_width, 2))
+            # a = np.zeros(shape=(self.map_height, self.map_width)) # for observing
+            for x in range(self.map_height):
+                for y in range(self.map_width):
+                    if model_map[x][y] == 1:
+                        continue
+                    astar = A_star.A_star(self.model_map, x, y, self.exit_list[4][0], self.exit_list[4][1])
+                    path = np.array(astar.get_path())
+                    self.a_star_map[x][y] = path[0]
+                    # a[x][y] = path[0][0]*10 + path[0][1]
+            np.save(a_star_map_name, self.a_star_map)
+            print("The progress of presetting a_star_map finished! ")
 
     def a_star(self, start_point, end_point):
         start_x = math.floor(start_point[0])
@@ -83,10 +101,10 @@ class Model:
         #             self.temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
         #             self.temp_wall_list.append([self.wall_list[i][0] + j, self.wall_list[i][1] + k])
 
-        astar = A_star.A_star(self.model_map, start_x, start_y, end_point[0], end_point[1])
-        path = np.array(astar.get_path())
-        # print(path)
-        return path[0]
+        # astar = A_star.A_star(self.model_map, start_x, start_y, end_point[0], end_point[1])
+        # path = np.array(astar.get_path())
+        # # print(path)
+        return self.a_star_map[start_x, start_y]
 
     def accelerate(self, i, e):
         ca1 = self.mass * (
@@ -156,7 +174,7 @@ class Model:
                         min_length = len(d)
                         e = d
             a = self.accelerate(i, e) * self.const_number
-            print_n = self.print_n # and i == 3
+            print_n = self.print_n  # and i == 3
             if print_n:
                 print(i, "th:", " accelerate:", a, "e: ", e)
                 print("old_p: ", self.people_list[i])
