@@ -4,6 +4,7 @@ import math
 import os
 from tqdm import tqdm
 
+
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
     model_map = np.ones(shape=(sizeX, sizeY))
     model_map[1:(sizeX - 1), 1:(sizeY - 1)] = 0  # wall
@@ -16,7 +17,7 @@ def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_de
     # exit_list = [[199, 100], [199, 101]]
     for x, y in exit_describe:
         model_map[x][y] = 0
-    if people_describe == []:
+    if people_describe:
         # random
         print('wrong')
     # people_list = []

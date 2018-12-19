@@ -1,9 +1,12 @@
 import social_force
-import sys
+# import sys
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QPushButton)
-from PyQt5.QtGui import QPainter, QColor, QBrush, QPixmap
-import numpy as np
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton  # QApplication
+from PyQt5.QtGui import QPainter, QPixmap  # QColor, QBrush
+
+
+# import numpy as np
+
 
 class Gui(QWidget):
     def __init__(self, model_map, exit_list, people_list, wall_list, a_star_map_name):
@@ -13,15 +16,17 @@ class Gui(QWidget):
             self.paintX0 = (500 - self.sizePerPoint * self.mapSize[1]) / 2 + self.startX0
             self.paintY0 = (500 - self.sizePerPoint * self.mapSize[0]) / 2 + self.startY0
             print(self.paintX0, self.paintY0)
-        def initPeople():     
+
+        def initPeople():
             self.peopleList = []
             image = QPixmap()
-            image.load("../1.png")
+            image.load("1.png")
             for p in people_list:
                 label = QLabel(self)
                 px = (p[1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
                 py = (p[0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
-                label.setGeometry(px, py, self.sizePerPoint * self.peopleRadius * 2, self.sizePerPoint * self.peopleRadius * 2)
+                label.setGeometry(px, py, self.sizePerPoint * self.peopleRadius * 2,
+                                  self.sizePerPoint * self.peopleRadius * 2)
                 label.setPixmap(image)
                 label.setScaledContents(True)
                 self.peopleList.append(label)
@@ -40,7 +45,7 @@ class Gui(QWidget):
         self.time = 0
         self.timeInterval = 50
         self.runState = 0
-        self.timerInterval = 5 # 50
+        self.timerInterval = 5  # 50
         self.initUI()
         # self.timer.start(1000)
 
@@ -66,7 +71,7 @@ class Gui(QWidget):
 
     def updateModel(self):
         self.time += self.timeInterval
-        self.timeLabel.setText('%.3f'%(self.time / 1000))
+        self.timeLabel.setText('%.3f' % (self.time / 1000))
         pList, apList, aNum = self.model.update()
         for i in range(len(aNum)):
             ap = self.peopleList.pop(aNum[i])
@@ -78,7 +83,7 @@ class Gui(QWidget):
             px = (pList[i][1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
             py = (pList[i][0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
             self.peopleList[i].move(px, py)
-        if (self.peopleList != [] and self.runState):
+        if self.peopleList != [] and self.runState:
             self.timer.start(self.timerInterval)
         else:
             self.timer.stop()
@@ -102,12 +107,12 @@ class Gui(QWidget):
         drawWall(painter)
 
     def step(self):
-        if (self.runState != 1):
+        if self.runState != 1:
             self.timer.start(self.timerInterval)
 
     def run(self):
         sender = self.sender()
-        if (sender.text() == "RUN"):
+        if sender.text() == "RUN":
             sender.setText("PAUSE")
             self.runState = 1
             self.timer.start(self.timerInterval)
@@ -115,18 +120,3 @@ class Gui(QWidget):
             sender.setText("RUN")
             self.runState = 0
             self.timer.stop()
-
-
-if __name__ == '__main__':
-    
-    sizeX = 50
-    sizeY = 50
-    wallDescribe = [[24, 25, 1, 18]]
-    exitDescribe = [[49, 25], [49, 26]]
-    peopleDescribe = [[10, 4], [10, 11], [10, 18], [17, 4], [17, 11]]
-    
-    APP = QApplication(sys.argv)
-    model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe)
-    ex = Gui(model_map, exit_list, people_list, wall_list)
-    sys.exit(APP.exec_())
-
