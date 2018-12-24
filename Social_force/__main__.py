@@ -42,13 +42,12 @@ if __name__ == "__main__":
     # model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
     #                                                                                    exitDescribe, peopleDescribe)
 
-    
+    thickness = 5
     sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe = map.getDes()
-    model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
-                                                                                       exitDescribe, peopleDescribe)
+    model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, thickness)
 
     APP = QApplication(sys.argv)
-    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy")
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness)
     sys.exit(APP.exec_())
 
     # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "../a_atar_map_name.npy")

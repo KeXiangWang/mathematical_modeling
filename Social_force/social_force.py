@@ -5,13 +5,14 @@ import os
 from tqdm import tqdm
 
 
-def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
+def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe, thickness):
     model_map = np.ones(shape=(sizeX, sizeY))
-    model_map[1:(sizeX - 1), 1:(sizeY - 1)] = 0  # wall
+    model_map[thickness:(sizeX - thickness), thickness:(sizeY - thickness)] = 0  # wall
     for w in wall_describe:
         model_map[w[0]:w[1], w[2]:w[3]] = 1
     for x, y in exit_describe:
-        model_map[x][y] = 0
+        for i in range(thickness):
+            model_map[x][y - i] = 0
     if people_describe:
         # random
         print('wrong')
@@ -38,7 +39,7 @@ def distance(people1, people2):
 
 
 class Model:
-    def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name):
+    def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness):
         # print(exit_list)
         self.wall_describe = wall_describe
         self.model_map = model_map

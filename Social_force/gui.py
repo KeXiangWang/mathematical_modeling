@@ -7,7 +7,7 @@ import sys
 import map
 
 class Gui(QWidget):
-    def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name):
+    def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness):
         def setMap():
             self.mapSize = self.modelMap.shape
             self.sizePerPoint = min(500 / self.mapSize[0], 500 / self.mapSize[1])
@@ -35,7 +35,7 @@ class Gui(QWidget):
         self.startY0 = 20
         self.peopleRadius = 2
         self.modelMap = model_map
-        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name)
+        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness)
         setMap()
         initPeople()
         self.timer = QTimer(self)
