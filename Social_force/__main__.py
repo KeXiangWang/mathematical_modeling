@@ -42,10 +42,10 @@ if __name__ == "__main__":
                                                                                        exitDescribe, peopleDescribe)
 
     APP = QApplication(sys.argv)
-    ex = Gui(model_map, exit_list, people_list, wall_list, "../a_atar_map_name.npy")
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "../a_atar_map_name.npy")
     sys.exit(APP.exec_())
 
-    # model = social_force.Model(model_map, exit_list, people_list, wall_list)
+    # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "../a_atar_map_name.npy")
     # model.a_star(people_list[3], exitDescribe[0])
     #
     # for i in range(20):

@@ -8,13 +8,8 @@ from tqdm import tqdm
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe):
     model_map = np.ones(shape=(sizeX, sizeY))
     model_map[1:(sizeX - 1), 1:(sizeY - 1)] = 0  # wall
-    # a = np.random.randint(0, 50, size=(1, 2))
-    # model_map[a] = 1  # random table
     for w in wall_describe:
         model_map[w[0]:w[1], w[2]:w[3]] = 1
-
-    # model_map[100, 1:160] = 1
-    # exit_list = [[199, 100], [199, 101]]
     for x, y in exit_describe:
         model_map[x][y] = 0
     if people_describe:
@@ -43,8 +38,9 @@ def distance(people1, people2):
 
 
 class Model:
-    def __init__(self, model_map, exit_list, people_list, wall_list, a_star_map_name):
+    def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name):
         # print(exit_list)
+        self.wall_describe = wall_describe
         self.model_map = model_map
         self.exit_list = exit_list
         self.people_list = people_list
@@ -87,24 +83,6 @@ class Model:
     def a_star(self, start_point, end_point):
         start_x = math.floor(start_point[0])
         start_y = math.floor(start_point[1])
-        # self.temp_map = np.zeros([50, 50])
-        # self.temp_wall_list = []
-        # for i in range(len(self.wall_list)):
-        #     for j in range(-2, 3):
-        #         if self.wall_list[i][0] + j < 0 or self.wall_list[i][0] + j >= 50:
-        #             continue
-        #         for k in range(-2, 3):
-        #             if self.wall_list[i][1] + k < 0 or self.wall_list[i][1] + k >= 50:
-        #                 continue
-        #             for x, y in self.exit_list:
-        #                 if self.wall_list[i][0] + j == x and self.wall_list[i][1] + k == y:
-        #                     continue
-        #             self.temp_map[self.wall_list[i][0] + j][self.wall_list[i][1] + k] = 1
-        #             self.temp_wall_list.append([self.wall_list[i][0] + j, self.wall_list[i][1] + k])
-
-        # astar = A_star.A_star(self.model_map, start_x, start_y, end_point[0], end_point[1])
-        # path = np.array(astar.get_path())
-        # # print(path)
         return self.a_star_map[start_x, start_y]
 
     def accelerate(self, i, e):
@@ -115,14 +93,33 @@ class Model:
             if i != j:
                 ca2 = ca2 + self.force_people_people(i, j)
         ca3 = [0, 0]
-        for w in range(len(self.wall_list)):
+        current_wall_list = self.get_wall(i)
+        # print(current_wall_list)
+        for w in range(len(current_wall_list)):
+        # for w in range(len(self.wall_list)):
             c = self.force_people_wall(i, w)
-            # if c[1] > 0.1:
             ca3 = ca3 + c
-            # print(self.wall_list[w], c)
         if self.print_n:
             print("ca1: ", ca1, "ca2: ", ca2, "ca3: ", ca3)
         return (ca1 + ca2 + ca3) / self.mass
+
+    def get_wall(self, location):
+        current = self.people_list[location]
+        walls = []
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if abs(i + j) == 1:
+                    target = np.ones(shape=2, dtype=np.int32)
+                    target[0] = math.floor((current[0]) if i == 0 else 0 if i == -1 else self.map_height - 1)
+                    target[1] = math.floor((current[1]) if j == 0 else 0 if j == -1 else self.map_width - 1)
+                    if self.model_map[target[0]][target[1]] == 1:
+                        walls.append(target)
+        for w in self.wall_describe:
+            choice = np.ones(shape=2, dtype=np.int32)
+            choice[0] = math.floor(w[0] if current[0] <= w[0] else current[0] if current[0] < w[1] else w[1])
+            choice[1] = math.floor(w[2] if current[1] <= w[2] else current[1] if current[1] < w[3] else w[3])
+            walls.append(choice)
+        return walls
 
     def force_people_people(self, i, j):
         r_ij = (self.radius + self.radius) / self.const_number

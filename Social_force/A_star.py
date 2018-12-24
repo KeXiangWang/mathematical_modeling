@@ -16,7 +16,7 @@ class Node(object):
         self.x = x
         self.y = y
         if father is not None:
-            self.G = father.G + 1
+            self.G = father.G + 1 * math.sqrt((x-self.father.x)**2 + (y-self.father.y)**2)
             self.H = distance(self, end)
             self.F = self.G + self.H
         else:
