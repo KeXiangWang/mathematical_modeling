@@ -10,7 +10,7 @@ def distance(cur, end):
 
 class Node(object):
     def __init__(self, father, x, y, end):
-        if x < 0 or x >= map_width or y < 0 or y >= map_height:
+        if x < 0 or x >= map_height or y < 0 or y >= map_width:
             raise Exception('坐标错误')
         self.father = father
         self.x = x

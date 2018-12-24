@@ -48,6 +48,7 @@ class Model:
         self.wall_list = wall_list
         self.velocity_list = np.zeros(shape=(len(people_list), 2))
         self.map_height, self.map_width = self.model_map.shape
+        self.thickness = thickness
         # constant
         self.const_number = 10
         self.velocity_i_0 = 0.8 * self.const_number  # units of measurement: dm/s
@@ -111,8 +112,8 @@ class Model:
             for j in range(-1, 2):
                 if abs(i + j) == 1:
                     target = np.ones(shape=2, dtype=np.int32)
-                    target[0] = math.floor((current[0]) if i == 0 else 0 if i == -1 else self.map_height - 1)
-                    target[1] = math.floor((current[1]) if j == 0 else 0 if j == -1 else self.map_width - 1)
+                    target[0] = math.floor((current[0]) if i == 0 else self.thickness-1 if i == -1 else self.map_height - self.thickness)
+                    target[1] = math.floor((current[1]) if j == 0 else self.thickness-1 if j == -1 else self.map_width - self.thickness)
                     if self.model_map[target[0]][target[1]] == 1:
                         walls.append(target)
         for w in self.wall_describe:
@@ -178,7 +179,7 @@ class Model:
             a = self.accelerate(i, e) * self.const_number
             a[0] = a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100
             a[1] = a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100
-            print(a)
+            # print(a)
             print_n = self.print_n  # and i == 3
             if print_n:
                 print(i, "th:", " accelerate:", a, "e: ", e)
