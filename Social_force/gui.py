@@ -1,7 +1,7 @@
 import social_force
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QPointF
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QApplication
-from PyQt5.QtGui import QPainter, QPixmap  # QColor, QBrush
+from PyQt5.QtGui import QPainter, QPixmap, QPainterPath, QPolygonF, QPen  # QColor, QBrush
 # import numpy as np
 import sys
 import map
@@ -19,6 +19,7 @@ class Gui(QWidget):
             self.peopleList = []
             image = QPixmap()
             image.load("1.png")
+            r = self.peopleRadius * self.sizePerPoint
             for p in people_list:
                 label = QLabel(self)
                 px = (p[1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
@@ -27,7 +28,9 @@ class Gui(QWidget):
                                   self.sizePerPoint * self.peopleRadius * 2)
                 label.setPixmap(image)
                 label.setScaledContents(True)
-                self.peopleList.append(label)
+                path = QPolygonF()
+                path << QPointF(px + r, py + r)
+                self.peopleList.append([label, path])
             self.arriveList = []
 
         super().__init__()
@@ -71,16 +74,19 @@ class Gui(QWidget):
         self.time += self.timeInterval
         self.timeLabel.setText('%.3f' % (self.time / 1000))
         pList, apList, aNum = self.model.update()
+        r = self.peopleRadius * self.sizePerPoint
         for i in range(len(aNum)):
             ap = self.peopleList.pop(aNum[i])
             apx = (apList[i][1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
             apy = (apList[i][0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
-            ap.move(apx, apy)
-            # self.arriveList.append(ap)
+            ap[0].move(apx, apy)
+            ap[1] << QPointF(apx + r, apy + r)
+            self.arriveList.append(ap)
         for i in range(len(pList)):
             px = (pList[i][1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
             py = (pList[i][0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
-            self.peopleList[i].move(px, py)
+            self.peopleList[i][0].move(px, py)
+            self.peopleList[i][1] << QPointF(px + r, py + r)
         if self.peopleList != [] and self.runState:
             self.timer.start(self.timerInterval)
         else:
@@ -94,15 +100,32 @@ class Gui(QWidget):
                 painter.setBrush(Qt.black)
                 painter.drawRect(dx, dy, self.sizePerPoint, self.sizePerPoint)
 
-            painter.setPen(Qt.black)
             for i in range(self.mapSize[0]):
                 for j in range(self.mapSize[1]):
                     if self.modelMap[i][j] == 1:
                         oneWall(j, i, painter)
+        
+        def drawPath(painter):
+            painter.setPen(QPen(Qt.blue, 1))
+            painter.setBrush(False)
+            for pInf in self.peopleList:
+                path = QPainterPath()
+                p = pInf[1]
+                path.addPolygon(p)
+                # path.closeSubpath()
+                painter.drawPath(path)
+            for pInf in self.arriveList:
+                path = QPainterPath()
+                p = pInf[1]
+                path.addPolygon(p)
+                # path.closeSubpath()
+                painter.drawPath(path)
+
 
         painter = QPainter()
         painter.begin(self)
         drawWall(painter)
+        drawPath(painter)
 
     def step(self):
         if self.runState != 1:
@@ -123,8 +146,8 @@ if __name__ == '__main__':
 
     sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe = map.getDes()
     model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
-                                                                                       exitDescribe, peopleDescribe)
+                                                                                       exitDescribe, peopleDescribe, 5)
 
     APP = QApplication(sys.argv)
-    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, " ")
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", 5)
     sys.exit(APP.exec_())
