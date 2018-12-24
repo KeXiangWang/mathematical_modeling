@@ -96,7 +96,7 @@ class Model:
         current_wall_list = self.get_wall(i)
         # print(current_wall_list)
         for w in current_wall_list:
-        # for w in range(len(self.wall_list)):
+            # for w in range(len(self.wall_list)):
             c = self.force_people_wall(i, w)
             ca3 = ca3 + c
         if self.print_n:
@@ -143,7 +143,7 @@ class Model:
         ca2 = self.k * g
         # n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
         n_iw = (self.people_list[i] - w) / self.const_number / d_iw
-        print(n_iw, w)
+        # print(n_iw, w)
         ca3 = (ca1 + ca2) * n_iw
         t_iw = [-n_iw[1], n_iw[0]]
         delta_v_wi = (0 - self.velocity_list[i]) * t_iw
@@ -175,6 +175,9 @@ class Model:
                         min_length = len(d)
                         e = d
             a = self.accelerate(i, e) * self.const_number
+            a[0] = a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100
+            a[1] = a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100
+            print(a)
             print_n = self.print_n  # and i == 3
             if print_n:
                 print(i, "th:", " accelerate:", a, "e: ", e)
