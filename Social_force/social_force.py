@@ -95,7 +95,7 @@ class Model:
         ca3 = [0, 0]
         current_wall_list = self.get_wall(i)
         # print(current_wall_list)
-        for w in range(len(current_wall_list)):
+        for w in current_wall_list:
         # for w in range(len(self.wall_list)):
             c = self.force_people_wall(i, w)
             ca3 = ca3 + c
@@ -136,11 +136,14 @@ class Model:
 
     def force_people_wall(self, i, w):
         r_iw = (self.radius + self.radius_wall) / self.const_number
-        d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
+        d_iw = distance(self.people_list[i], w) / self.const_number
+        # d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
         ca1 = self.A_i * math.exp((r_iw - d_iw) / self.B_i)
         g = 0
         ca2 = self.k * g
-        n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
+        # n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
+        n_iw = (self.people_list[i] - w) / self.const_number / d_iw
+        print(n_iw, w)
         ca3 = (ca1 + ca2) * n_iw
         t_iw = [-n_iw[1], n_iw[0]]
         delta_v_wi = (0 - self.velocity_list[i]) * t_iw
