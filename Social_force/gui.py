@@ -1,12 +1,10 @@
 import social_force
-# import sys
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton  # QApplication
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QApplication
 from PyQt5.QtGui import QPainter, QPixmap  # QColor, QBrush
-
-
 # import numpy as np
-
+import sys
+import map
 
 class Gui(QWidget):
     def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name):
@@ -120,3 +118,13 @@ class Gui(QWidget):
             sender.setText("RUN")
             self.runState = 0
             self.timer.stop()
+
+if __name__ == '__main__':
+
+    sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe = map.getDes()
+    model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
+                                                                                       exitDescribe, peopleDescribe)
+
+    APP = QApplication(sys.argv)
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, " ")
+    sys.exit(APP.exec_())
