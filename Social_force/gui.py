@@ -20,19 +20,22 @@ class Gui(QWidget):
             self.peopleList = []
             image = QPixmap()
             image.load("1.png")
+            image2 = QPixmap()
+            image2.load("2.png")
             r = self.peopleRadius * self.sizePerPoint
             for i in range(len(people_list)):
                 p = people_list[i]
-                if i < bound:
-                    pType = 0
-                else:
-                    pType = 1
                 label = QLabel(self)
                 px = (p[1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
                 py = (p[0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
                 label.setGeometry(px, py, self.sizePerPoint * self.peopleRadius * 2,
                                   self.sizePerPoint * self.peopleRadius * 2)
-                label.setPixmap(image)
+                if i < bound:
+                    label.setPixmap(image2)
+                    pType = 0
+                else:
+                    label.setPixmap(image)
+                    pType = 1
                 label.setScaledContents(True)
                 path = QPolygonF()
                 path << QPointF(px + r, py + r)
