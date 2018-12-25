@@ -55,9 +55,10 @@ if __name__ == "__main__":
     sys.exit(APP.exec_())
 
     # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
-                            #    thickness, encounter_mode=True)
-    # model.a_star(people_list[3], exitDescribe[0])
-
+    #                            thickness, encounter_mode=mode, group_bound=bound, exit_point=exit_point)
+    # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
+    #                            thickness, mode, bound, exit_point)
+    #
     # for i in range(20):
     #     people_list, people_arrive_list, _ = model.update()
     #     print("time:", i, people_list.shape)
