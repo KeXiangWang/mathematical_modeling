@@ -53,10 +53,10 @@ class Model:
         self.exit_list = exit_list
         self.people_list = people_list
         self.wall_list = wall_list
-        self.velocity_list = np.zeros(shape=(len(people_list), 2))
-        self.map_height, self.map_width = self.model_map.shape
         self.thickness = thickness
         self.encounter_mode = encounter_mode
+        self.velocity_list = np.zeros(shape=(len(people_list), 2))
+        self.map_height, self.map_width = self.model_map.shape
         self.color_list = np.ones(shape=len(people_list), dtype=np.int32)
         self.color_list[0:group_bound] = 0
         # constant
@@ -192,20 +192,15 @@ class Model:
     def force_people_wall(self, i, w):
         r_iw = (self.radius + self.radius_wall) / self.const_number
         d_iw = distance(self.people_list[i], w) / self.const_number
-        # d_iw = distance(self.people_list[i], self.wall_list[w]) / self.const_number
         ca1 = self.A_i * math.exp((r_iw - d_iw) / self.B_i)
         g = 0
         ca2 = self.k * g
-        # n_iw = (self.people_list[i] - self.wall_list[w]) / self.const_number / d_iw
         n_iw = (self.people_list[i] - w) / self.const_number / d_iw
-        # print(n_iw, w)
         ca3 = (ca1 + ca2) * n_iw
         t_iw = [-n_iw[1], n_iw[0]]
         delta_v_wi = (0 - self.velocity_list[i]) * t_iw
         ca4 = self.k_body_effect_coefficient * g * delta_v_wi * (
                 self.velocity_list[i][0] * t_iw[0] + self.velocity_list[i][1] * t_iw[1]) * t_iw
-        # if abs(ca3[0]) > 1:
-        #     print("ca1 ", ca1, "ca2 ", ca2, "ca3 ", ca3, "n  ", n_iw, "d ", d_iw)
         return ca3 + ca4
 
     # def touch_wall(self, loc):
