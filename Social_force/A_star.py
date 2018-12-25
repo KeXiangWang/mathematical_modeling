@@ -6,6 +6,7 @@ map_height = 0
 
 def distance(cur, end):
     return abs(cur.x - end.x) + abs(cur.y - end.y)
+    # return max(abs(cur.x - end.x), abs(cur.y - end.y))
 
 
 class Node(object):
@@ -16,7 +17,7 @@ class Node(object):
         self.x = x
         self.y = y
         if father is not None:
-            self.G = father.G + 1 * math.sqrt((x-self.father.x)**2 + (y-self.father.y)**2)
+            self.G = father.G + 1 * math.sqrt((x - self.father.x) ** 2 + (y - self.father.y) ** 2)
             self.H = distance(self, end)
             self.F = self.G + self.H
         else:
@@ -120,7 +121,7 @@ class A_star(object):
                 self.open_list[(a.x, a.y)] = a
             else:  # 如果存在在open_list中，通过G值判断这个点是否更近
                 exist_node = self.open_list[(a.x, a.y)]
-                new_g = node.G + math.sqrt((a.x - node.x)**2 +  (a.y - node.y)**2)
+                new_g = node.G + math.sqrt((a.x - node.x) ** 2 + (a.y - node.y) ** 2)
                 if new_g < exist_node.G:
                     exist_node.reset_father(node, new_g)
         return False
