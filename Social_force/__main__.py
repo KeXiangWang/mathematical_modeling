@@ -44,14 +44,17 @@ if __name__ == "__main__":
     #                                                                                    exitDescribe, peopleDescribe)
 
     thickness = 5
-    sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = convectionMap.getDes()
-    # sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = map.getDes()
+    convection_mode = False
+    if convection_mode:
+        sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = convectionMap.getDes()
+    else:
+        sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = map.getDes()
     model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
                                                                                        exitDescribe, peopleDescribe,
                                                                                        thickness)
 
     APP = QApplication(sys.argv)
-    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness, mode, bound, exit_point)
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness, convection_mode, bound, exit_point)
     sys.exit(APP.exec_())
 
     # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
