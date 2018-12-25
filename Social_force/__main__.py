@@ -1,4 +1,5 @@
 import social_force
+import A_star
 from gui import Gui
 from PyQt5.QtWidgets import QApplication
 import sys
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     #                                                                                    exitDescribe, peopleDescribe)
 
     thickness = 5
-    convection_mode = True
+    convection_mode = False
     if convection_mode:
         sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = convectionMap.getDes()
     else:
@@ -54,8 +55,11 @@ if __name__ == "__main__":
                                                                                        thickness)
 
     APP = QApplication(sys.argv)
-    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness, convection_mode, bound, exit_point)
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness,
+             convection_mode, bound, exit_point)
     sys.exit(APP.exec_())
+
+    # A_star.test_a_star(model_map)
 
     # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
     #                            thickness, encounter_mode=mode, group_bound=bound, exit_point=exit_point)

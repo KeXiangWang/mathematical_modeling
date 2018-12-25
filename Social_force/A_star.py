@@ -4,9 +4,20 @@ map_width = 0
 map_height = 0
 
 
+def test_a_star(model_map):
+    astar = A_star(model_map, 10, 10, 35, 93)
+    path = astar.get_path()
+    print(path)
+
+
 def distance(cur, end):
     return abs(cur.x - end.x) + abs(cur.y - end.y)
-    # return max(abs(cur.x - end.x), abs(cur.y - end.y))
+    # h_diagonal = min(abs(cur.x - end.x), abs(cur.y - end.y))
+    # h_straight = (abs(cur.x - end.x) + abs(cur.y - end.y))
+    # d = 1
+    # d_2 = math.sqrt(2)
+    # return d_2 * h_diagonal + d * (h_straight - 2 * h_diagonal)
+    # return math.sqrt((cur.x - end.x) ** 2 + (cur.x - end.x) ** 2)
 
 
 class Node(object):
@@ -48,16 +59,6 @@ class A_star(object):
     def mark_path(self, node):
         if node.father is None:
             return
-        # print('({x},{y})'.format(x=node.x,y=node.y))
-        # 将方向信息存储到方向列表中
-        # if node.father.x - node.x > 0:
-        #     self.orientation.append('L')
-        # elif node.father.x - node.x < 0:
-        #     self.orientation.append('R')
-        # elif node.father.y - node.y > 0:
-        #     self.orientation.append('U')
-        # elif node.father.y - node.y < 0:
-        #     self.orientation.append('D')
         self.orientation.append([node.x - node.father.x, node.y - node.father.y])
         self.mark_path(node.father)
 
@@ -67,7 +68,7 @@ class A_star(object):
         _min = 9999999999999999
         _k = (self.start.x, self.start.y)
         for k, v in self.open_list.items():  # 以列表的形式遍历open_list字典
-            if _min > v.F:
+            if _min >= v.F:
                 _min = v.F
                 _k = k
         return self.open_list[_k]
