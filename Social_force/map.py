@@ -24,7 +24,6 @@ def getDes():
     exitDes = []
     for i in range(32, 39):
         exitDes.append([i, 93])
-    
     peopleDes = []
     for i in range(1, 27):
         with open("data/#00001横向障碍物-窄门-无奖励-1_v5/" + str(i) + ".txt") as f:
@@ -37,7 +36,8 @@ def getDes():
                 continue
             peopleDes.append([px, py])
 
-    return mapX, mapY, deskDes, exitDes, peopleDes
+    return mapX, mapY, deskDes, exitDes, peopleDes, False, 0, []
+
 
 if __name__ == '__main__':
     desk = [[9.308, 7.481], [9.308, 7.481 - 0.572], [9.308 + 1.17, 7.481], [9.308 + 1.17, 7.481 - 0.572]]

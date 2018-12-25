@@ -7,7 +7,7 @@ import sys
 import map
 
 class Gui(QWidget):
-    def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness):
+    def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness, mode, bound, exit_point):
         def setMap():
             self.mapSize = self.modelMap.shape
             self.sizePerPoint = min(500 / self.mapSize[0], 500 / self.mapSize[1])
@@ -20,7 +20,12 @@ class Gui(QWidget):
             image = QPixmap()
             image.load("1.png")
             r = self.peopleRadius * self.sizePerPoint
-            for p in people_list:
+            for i in range(len(people_list)):
+                p = people_list[i]
+                if i < bound:
+                    pType = 0
+                else:
+                    pType = 1
                 label = QLabel(self)
                 px = (p[1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
                 py = (p[0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
@@ -30,7 +35,7 @@ class Gui(QWidget):
                 label.setScaledContents(True)
                 path = QPolygonF()
                 path << QPointF(px + r, py + r)
-                self.peopleList.append([label, path])
+                self.peopleList.append([label, path, pType])
             self.arriveList = []
 
         super().__init__()
@@ -38,7 +43,7 @@ class Gui(QWidget):
         self.startY0 = 20
         self.peopleRadius = 2
         self.modelMap = model_map
-        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness)
+        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness, mode, bound, exit_point)
         setMap()
         initPeople()
         self.timer = QTimer(self)
@@ -97,6 +102,7 @@ class Gui(QWidget):
             def oneWall(x, y, painter):
                 dx = x * self.sizePerPoint + self.paintX0
                 dy = y * self.sizePerPoint + self.paintY0
+                painter.setPen(Qt.black)
                 painter.setBrush(Qt.black)
                 painter.drawRect(dx, dy, self.sizePerPoint, self.sizePerPoint)
 
@@ -106,19 +112,24 @@ class Gui(QWidget):
                         oneWall(j, i, painter)
         
         def drawPath(painter):
-            painter.setPen(QPen(Qt.blue, 1))
             painter.setBrush(False)
             for pInf in self.peopleList:
                 path = QPainterPath()
                 p = pInf[1]
                 path.addPolygon(p)
-                # path.closeSubpath()
+                if pInf[2] == 1:
+                    painter.setPen(QPen(Qt.blue, 1))
+                else:
+                    painter.setPen(QPen(Qt.red, 1))
                 painter.drawPath(path)
             for pInf in self.arriveList:
                 path = QPainterPath()
                 p = pInf[1]
                 path.addPolygon(p)
-                # path.closeSubpath()
+                if pInf[2] == 1:
+                    painter.setPen(QPen(Qt.blue, 1))
+                else:
+                    painter.setPen(QPen(Qt.red, 1))
                 painter.drawPath(path)
 
 

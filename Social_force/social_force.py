@@ -12,10 +12,13 @@ def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_de
         model_map[w[0]:w[1], w[2]:w[3]] = 1
     for x, y in exit_describe:
         for i in range(thickness):
-            model_map[x][y - i] = 0
-    if people_describe:
+            if (y == sizeY - 1):
+                model_map[x][y - i] = 0
+            else:
+                model_map[x][y + i] = 0
+    # if people_describe:
         # random
-        print('wrong')
+        # print('wrong')
     # people_list = []
     # for i in range(5):
     #     p = [i * 5 + 25, 50]

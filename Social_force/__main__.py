@@ -3,6 +3,7 @@ from gui import Gui
 from PyQt5.QtWidgets import QApplication
 import sys
 import map
+import convectionMap
 
 if __name__ == "__main__":
     print("The start of the model")
@@ -43,17 +44,18 @@ if __name__ == "__main__":
     #                                                                                    exitDescribe, peopleDescribe)
 
     thickness = 5
-    sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe = map.getDes()
+    sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = convectionMap.getDes()
+    # sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = map.getDes()
     model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
                                                                                        exitDescribe, peopleDescribe,
                                                                                        thickness)
 
-    # APP = QApplication(sys.argv)
-    # ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness)
-    # sys.exit(APP.exec_())
+    APP = QApplication(sys.argv)
+    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness, mode, bound, exit_point)
+    sys.exit(APP.exec_())
 
-    model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
-                               thickness, encounter_mode=True)
+    # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
+                            #    thickness, encounter_mode=True)
     # model.a_star(people_list[3], exitDescribe[0])
 
     # for i in range(20):
