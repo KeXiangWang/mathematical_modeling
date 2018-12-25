@@ -40,10 +40,10 @@ def distance(people1, people2):
 
 class Model:
     def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness,
-                 encounter_mode=False, group_bound=0, exit_point=[]):
+                 encounter_mode=False, group_bound=0, exit_point=None):
         #################
         # encounter_mode:   weather is for encounter mode
-        # froup_bound:      the border of two group
+        # group_bound:      the border of two group
         # exit_point:       two point -- two center of two exit
         self.wall_describe = wall_describe
         self.model_map = model_map
@@ -54,7 +54,8 @@ class Model:
         self.map_height, self.map_width = self.model_map.shape
         self.thickness = thickness
         self.encounter_mode = encounter_mode
-        self.group_bound = group_bound
+        self.color_list = np.ones(shape=len(people_list), dtype=np.int32)
+        self.color_list[0:group_bound] = 1
         # constant
         self.const_number = 10
         self.velocity_i_0 = 0.8 * self.const_number  # units of measurement: dm/s
@@ -75,20 +76,22 @@ class Model:
             insert_point = a_star_map_name.index('.')
             file_name_1 = a_star_map_name[:insert_point] + "_1" + a_star_map_name[insert_point:]
             file_name_2 = a_star_map_name[:insert_point] + "_2" + a_star_map_name[insert_point:]
-            self.a_star_map = np.zeros(shape=(2, self.map_height, self.map_width, 2))
+
             if os.path.isfile(file_name_1) and os.path.isfile(file_name_2):
-                self.a_star_map[0] = np.load(file_name_1)
-                self.a_star_map[1] = np.load(file_name_2)
+                self.a_star_map_0 = np.load(file_name_1)
+                self.a_star_map_1 = np.load(file_name_2)
                 print("Loaded the preset encounter a_star_map")
             else:
+                self.a_star_map_0 = np.zeros(shape=(self.map_height, self.map_width, 2))
+                self.a_star_map_1 = np.zeros(shape=(self.map_height, self.map_width, 2))
                 for x in tqdm(range(self.map_height)):
                     for y in range(self.map_width):
                         if model_map[x][y] == 1:
                             continue
                         astar = A_star.A_star(self.model_map, x, y, exit_point[0][0], exit_point[0][1])
                         path = np.array(astar.get_path())
-                        self.a_star_map[0][x][y] = path[0]
-                np.save(file_name_1, self.a_star_map)
+                        self.a_star_map_0[x][y] = path[0]
+                np.save(file_name_1, self.a_star_map_0)
                 print("First map preset! ")
                 for x in tqdm(range(self.map_height)):
                     for y in range(self.map_width):
@@ -96,8 +99,8 @@ class Model:
                             continue
                         astar = A_star.A_star(self.model_map, x, y, exit_point[1][0], exit_point[1][1])
                         path = np.array(astar.get_path())
-                        self.a_star_map[1][x][y] = path[0]
-                np.save(file_name_2, self.a_star_map)
+                        self.a_star_map_1[x][y] = path[0]
+                np.save(file_name_2, self.a_star_map_1)
                 print("Second map preset! ")
                 print("The progress of presetting a_star_map finished! ")
         else:
@@ -123,10 +126,10 @@ class Model:
         start_x = math.floor(start_point[0])
         start_y = math.floor(start_point[1])
         if self.encounter_mode:
-            if i < self.group_bound:
-                return self.a_star_map[0][start_x, start_y]
+            if self.color_list[i] == 0:
+                return self.a_star_map_0[start_x, start_y]
             else:
-                return self.a_star_map[1][start_x, start_y]
+                return self.a_star_map_1[start_x, start_y]
         else:
             return self.a_star_map[start_x, start_y]
 
@@ -229,7 +232,6 @@ class Model:
             #     new_people_list[i][0] = self.people_list[i][0]
             # if touch_y:
             #     new_people_list[i][1] = self.people_list[i][1]
-
             if print_n:
                 print("new_p: ", new_people_list[i])
             new_velocity_list.append(self.t_gap * a + self.velocity_list[i])  # at + v0
@@ -240,9 +242,11 @@ class Model:
                     print([math.floor(new_people_list[i][0]), math.floor(new_people_list[i][1])])
                     arrive_list.append(i)
         arrive_people_list = self.people_list[arrive_list]
+        arrive_color_list = self.color_list[arrive_list]
         new_people_list = np.array(new_people_list)
         new_velocity_list = np.array(new_velocity_list)
         self.people_list = np.delete(new_people_list, arrive_list, axis=0)
         self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
+        self.color_list = np.delete(self.color_list, arrive_list, axis=0)
         # self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
-        return self.people_list, arrive_people_list, arrive_list
+        return self.people_list, arrive_people_list, arrive_list, self.color_list, arrive_color_list

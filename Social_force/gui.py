@@ -6,6 +6,7 @@ from PyQt5.QtGui import QPainter, QPixmap, QPainterPath, QPolygonF, QPen  # QCol
 import sys
 import map
 
+
 class Gui(QWidget):
     def __init__(self, wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness):
         def setMap():
@@ -38,7 +39,8 @@ class Gui(QWidget):
         self.startY0 = 20
         self.peopleRadius = 2
         self.modelMap = model_map
-        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness)
+        self.model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, a_star_map_name,
+                                        thickness)
         setMap()
         initPeople()
         self.timer = QTimer(self)
@@ -73,7 +75,7 @@ class Gui(QWidget):
     def updateModel(self):
         self.time += self.timeInterval
         self.timeLabel.setText('%.3f' % (self.time / 1000))
-        pList, apList, aNum = self.model.update()
+        pList, apList, aNum, _, _ = self.model.update()
         r = self.peopleRadius * self.sizePerPoint
         for i in range(len(aNum)):
             ap = self.peopleList.pop(aNum[i])
@@ -104,7 +106,7 @@ class Gui(QWidget):
                 for j in range(self.mapSize[1]):
                     if self.modelMap[i][j] == 1:
                         oneWall(j, i, painter)
-        
+
         def drawPath(painter):
             painter.setPen(QPen(Qt.blue, 1))
             painter.setBrush(False)
@@ -120,7 +122,6 @@ class Gui(QWidget):
                 path.addPolygon(p)
                 # path.closeSubpath()
                 painter.drawPath(path)
-
 
         painter = QPainter()
         painter.begin(self)
@@ -142,8 +143,8 @@ class Gui(QWidget):
             self.runState = 0
             self.timer.stop()
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe = map.getDes()
     model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
                                                                                        exitDescribe, peopleDescribe, 5)
