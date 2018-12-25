@@ -246,11 +246,10 @@ class Model:
                     print([math.floor(new_people_list[i][0]), math.floor(new_people_list[i][1])])
                     arrive_list.append(i)
         arrive_people_list = self.people_list[arrive_list]
-        arrive_color_list = self.color_list[arrive_list]
         new_people_list = np.array(new_people_list)
         new_velocity_list = np.array(new_velocity_list)
         self.people_list = np.delete(new_people_list, arrive_list, axis=0)
         self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
         self.color_list = np.delete(self.color_list, arrive_list, axis=0)
         # self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
-        return self.people_list, arrive_people_list, arrive_list #, self.color_list, arrive_color_list
+        return self.people_list, arrive_people_list, arrive_list
