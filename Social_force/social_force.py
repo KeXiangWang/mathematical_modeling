@@ -58,7 +58,7 @@ class Model:
         self.thickness = thickness
         self.encounter_mode = encounter_mode
         self.color_list = np.ones(shape=len(people_list), dtype=np.int32)
-        self.color_list[0:group_bound] = 1
+        self.color_list[0:group_bound] = 0
         # constant
         self.const_number = 10
         self.velocity_i_0 = 0.8 * self.const_number  # units of measurement: dm/s
@@ -91,18 +91,20 @@ class Model:
                     for y in range(self.map_width):
                         if model_map[x][y] == 1:
                             continue
-                        astar = A_star.A_star(self.model_map, x, y, exit_point[0][0], exit_point[0][1])
-                        path = np.array(astar.get_path())
-                        self.a_star_map_0[x][y] = path[0]
+                        # astar = A_star.A_star(self.model_map, x, y, exit_point[0][0], exit_point[0][1])
+                        # path = np.array(astar.get_path())
+                        # self.a_star_map_0[x][y] = path[0]
+                        self.a_star_map_0[x][y] = [0, 1]
                 np.save(file_name_1, self.a_star_map_0)
                 print("First map preset! ")
                 for x in tqdm(range(self.map_height)):
                     for y in range(self.map_width):
                         if model_map[x][y] == 1:
                             continue
-                        astar = A_star.A_star(self.model_map, x, y, exit_point[1][0], exit_point[1][1])
-                        path = np.array(astar.get_path())
-                        self.a_star_map_1[x][y] = path[0]
+                        # astar = A_star.A_star(self.model_map, x, y, exit_point[1][0], exit_point[1][1])
+                        # path = np.array(astar.get_path())
+                        # self.a_star_map_1[x][y] = path[0]
+                        self.a_star_map_1[x][y] = [0, -1]
                 np.save(file_name_2, self.a_star_map_1)
                 print("Second map preset! ")
                 print("The progress of presetting a_star_map finished! ")
@@ -219,15 +221,14 @@ class Model:
         for i in range(len(self.people_list)):
             e = self.a_star(i)
             a = self.accelerate(i, e) * self.const_number
-            a[0] = a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100
-            a[1] = a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100
+            a[0] = (a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100) + np.random.randint(-50, 51)
+            a[1] = (a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100) + np.random.randint(-50, 51)
             # print(a)
             print_n = self.print_n  # and i == 3
             if print_n:
                 print(i, "th:", " accelerate:", a, "e: ", e)
                 print("old_p: ", self.people_list[i])
                 print("old_v: ", self.velocity_list[i])
-
             new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[
                 i] + 0.5 * a * self.t_gap ** 2)  # v0t + 1/2 * a * t**2
             # touch_x, touch_y = self.touch_wall(new_people_list[i])

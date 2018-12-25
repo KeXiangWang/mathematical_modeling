@@ -79,7 +79,7 @@ class Gui(QWidget):
     def updateModel(self):
         self.time += self.timeInterval
         self.timeLabel.setText('%.3f' % (self.time / 1000))
-        pList, apList, aNum, _, _ = self.model.update()
+        pList, apList, aNum = self.model.update()
         r = self.peopleRadius * self.sizePerPoint
         for i in range(len(aNum)):
             ap = self.peopleList.pop(aNum[i])
