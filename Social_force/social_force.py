@@ -39,8 +39,12 @@ def distance(people1, people2):
 
 
 class Model:
-    def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness):
-        # print(exit_list)
+    def __init__(self, wall_describe, model_map, exit_list, people_list, wall_list, a_star_map_name, thickness,
+                 encounter_mode=False, group_bound=0, exit_point=[]):
+        #################
+        # encounter_mode:   weather is for encounter mode
+        # froup_bound:      the border of two group
+        # exit_point:       two point -- two center of two exit
         self.wall_describe = wall_describe
         self.model_map = model_map
         self.exit_list = exit_list
@@ -49,6 +53,8 @@ class Model:
         self.velocity_list = np.zeros(shape=(len(people_list), 2))
         self.map_height, self.map_width = self.model_map.shape
         self.thickness = thickness
+        self.encounter_mode = encounter_mode
+        self.group_bound = group_bound
         # constant
         self.const_number = 10
         self.velocity_i_0 = 0.8 * self.const_number  # units of measurement: dm/s
@@ -65,27 +71,64 @@ class Model:
         self.print_n = 0
         self.easy_model = 1
         # a_star_map preset
-        if os.path.isfile(a_star_map_name):
-            self.a_star_map = np.load(a_star_map_name)
-            print("Loaded the preset a_star_map")
+        if encounter_mode:
+            insert_point = a_star_map_name.index('.')
+            file_name_1 = a_star_map_name[:insert_point] + "_1" + a_star_map_name[insert_point:]
+            file_name_2 = a_star_map_name[:insert_point] + "_2" + a_star_map_name[insert_point:]
+            self.a_star_map = np.zeros(shape=(2, self.map_height, self.map_width, 2))
+            if os.path.isfile(file_name_1) and os.path.isfile(file_name_2):
+                self.a_star_map[0] = np.load(file_name_1)
+                self.a_star_map[1] = np.load(file_name_2)
+                print("Loaded the preset encounter a_star_map")
+            else:
+                for x in tqdm(range(self.map_height)):
+                    for y in range(self.map_width):
+                        if model_map[x][y] == 1:
+                            continue
+                        astar = A_star.A_star(self.model_map, x, y, exit_point[0][0], exit_point[0][1])
+                        path = np.array(astar.get_path())
+                        self.a_star_map[0][x][y] = path[0]
+                np.save(file_name_1, self.a_star_map)
+                print("First map preset! ")
+                for x in tqdm(range(self.map_height)):
+                    for y in range(self.map_width):
+                        if model_map[x][y] == 1:
+                            continue
+                        astar = A_star.A_star(self.model_map, x, y, exit_point[1][0], exit_point[1][1])
+                        path = np.array(astar.get_path())
+                        self.a_star_map[1][x][y] = path[0]
+                np.save(file_name_2, self.a_star_map)
+                print("Second map preset! ")
+                print("The progress of presetting a_star_map finished! ")
         else:
-            self.a_star_map = np.zeros(shape=(self.map_height, self.map_width, 2))
-            # a = np.zeros(shape=(self.map_height, self.map_width)) # for observing
-            for x in tqdm(range(self.map_height)):
-                for y in range(self.map_width):
-                    if model_map[x][y] == 1:
-                        continue
-                    astar = A_star.A_star(self.model_map, x, y, self.exit_list[4][0], self.exit_list[4][1])
-                    path = np.array(astar.get_path())
-                    self.a_star_map[x][y] = path[0]
-                    # a[x][y] = path[0][0]*10 + path[0][1]
-            np.save(a_star_map_name, self.a_star_map)
-            print("The progress of presetting a_star_map finished! ")
+            if os.path.isfile(a_star_map_name):
+                self.a_star_map = np.load(a_star_map_name)
+                print("Loaded the preset a_star_map")
+            else:
+                self.a_star_map = np.zeros(shape=(self.map_height, self.map_width, 2))
+                # a = np.zeros(shape=(self.map_height, self.map_width)) # for observing
+                for x in tqdm(range(self.map_height)):
+                    for y in range(self.map_width):
+                        if model_map[x][y] == 1:
+                            continue
+                        astar = A_star.A_star(self.model_map, x, y, self.exit_list[4][0], self.exit_list[4][1])
+                        path = np.array(astar.get_path())
+                        self.a_star_map[x][y] = path[0]
+                        # a[x][y] = path[0][0]*10 + path[0][1]
+                np.save(a_star_map_name, self.a_star_map)
+                print("The progress of presetting a_star_map finished! ")
 
-    def a_star(self, start_point, end_point):
+    def a_star(self, i):
+        start_point = self.people_list[i]
         start_x = math.floor(start_point[0])
         start_y = math.floor(start_point[1])
-        return self.a_star_map[start_x, start_y]
+        if self.encounter_mode:
+            if i < self.group_bound:
+                return self.a_star_map[0][start_x, start_y]
+            else:
+                return self.a_star_map[1][start_x, start_y]
+        else:
+            return self.a_star_map[start_x, start_y]
 
     def accelerate(self, i, e):
         ca1 = self.mass * (
@@ -112,8 +155,10 @@ class Model:
             for j in range(-1, 2):
                 if abs(i + j) == 1:
                     target = np.ones(shape=2, dtype=np.int32)
-                    target[0] = math.floor((current[0]) if i == 0 else self.thickness-1 if i == -1 else self.map_height - self.thickness)
-                    target[1] = math.floor((current[1]) if j == 0 else self.thickness-1 if j == -1 else self.map_width - self.thickness)
+                    target[0] = math.floor(
+                        (current[0]) if i == 0 else self.thickness - 1 if i == -1 else self.map_height - self.thickness)
+                    target[1] = math.floor(
+                        (current[1]) if j == 0 else self.thickness - 1 if j == -1 else self.map_width - self.thickness)
                     if self.model_map[target[0]][target[1]] == 1:
                         walls.append(target)
         for w in self.wall_describe:
@@ -166,16 +211,7 @@ class Model:
         new_velocity_list = []
         new_people_list = []
         for i in range(len(self.people_list)):
-            min_length = 99999999999
-            if self.easy_model:
-                e = self.a_star(self.people_list[i], self.exit_list[4])
-            else:
-                e = [0, 0]
-                for j in range(len(self.exit_list)):
-                    d = self.a_star(self.people_list[i], self.exit_list[j])
-                    if len(d) < min_length:
-                        min_length = len(d)
-                        e = d
+            e = self.a_star(i)
             a = self.accelerate(i, e) * self.const_number
             a[0] = a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100
             a[1] = a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100

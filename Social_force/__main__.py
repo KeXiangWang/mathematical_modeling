@@ -47,14 +47,15 @@ if __name__ == "__main__":
     model_map, exit_list, people_list, wall_list = social_force.create_map_people_wall(sizeX, sizeY, wallDescribe,
                                                                                        exitDescribe, peopleDescribe,
                                                                                        thickness)
-
-    APP = QApplication(sys.argv)
-    ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness)
-    sys.exit(APP.exec_())
-
-    # model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "../a_atar_map_name.npy", thickness)
-    # model.a_star(people_list[3], exitDescribe[0])
     #
+    # APP = QApplication(sys.argv)
+    # ex = Gui(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy", thickness)
+    # sys.exit(APP.exec_())
+
+    model = social_force.Model(wallDescribe, model_map, exit_list, people_list, wall_list, "a_atar_map_name.npy",
+                               thickness, encounter_mode=True)
+    # model.a_star(people_list[3], exitDescribe[0])
+
     # for i in range(20):
     #     people_list, people_arrive_list, _ = model.update()
     #     print("time:", i, people_list.shape)
