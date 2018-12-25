@@ -84,8 +84,7 @@ class Gui(QWidget):
         self.timeLabel.setText('%.3f' % (self.time / 1000))
         pList, apList, aNum = self.model.update()
         r = self.peopleRadius * self.sizePerPoint
-        aNum.sort(reverse = True)
-        for i in range(len(aNum)):
+        for i in range(len(aNum)-1, -1, -1):
             ap = self.peopleList.pop(aNum[i])
             apx = (apList[i][1] - self.peopleRadius) * self.sizePerPoint + self.paintX0
             apy = (apList[i][0] - self.peopleRadius) * self.sizePerPoint + self.paintY0
