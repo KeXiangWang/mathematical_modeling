@@ -3,6 +3,11 @@ import A_star
 import math
 import os
 from tqdm import tqdm
+from torch import nn, optim
+import numpy as np
+import torch
+from torch.autograd import Variable
+from ANN.simple_net import simpleNet
 
 
 def create_map_people_wall(sizeX, sizeY, wall_describe, exit_describe, people_describe, thickness):
@@ -253,3 +258,118 @@ class Model:
         self.color_list = np.delete(self.color_list, arrive_list, axis=0)
         # self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
         return self.people_list, arrive_people_list, arrive_list
+
+
+    def get_rad(self, e):
+        res = 0
+        if e[0] is 1:
+            if e[1] is 0:
+                res = 0
+            elif e[1] is 1:
+                res = math.pi / 8
+            elif e[1] is -1:
+                res = 7 * math.pi / 8
+        elif e[0] is 0:
+            if e[1] is 1:
+                res = 2 * math.pi / 8
+            elif e[1] is -1:
+                res = 6 * math.pi / 8
+        elif e[1] is -1:
+            if e[1] is 1:
+                res = 3 * math.pi / 8
+            elif e[1] is 0:
+                res = 4 * math.pi / 8
+            elif e[1] is -1:
+                res = 5 * math.pi / 8
+        return res
+
+
+    def update_ANN(self):
+        model = simpleNet(22, 110, 110, 2)
+        model.load_state_dict(torch.load('../ANN/params.pkl'))
+        model.eval()
+
+        arrive_list = []
+        new_velocity_list = []
+        new_people_list = []
+        print('love')
+        for i in range(len(self.people_list)):
+            print(new_people_list)
+            e = self.a_star(i)
+            datain =[]
+            datain.append(math.sqrt(self.velocity_list[i]**2 + self.velocity_list[i][1]**2))
+            datain.append(self.get_rad(e))
+            W15 = []
+            W610 = []
+            W1115 = []
+            W1620 = []
+            neighbour = dict()
+            for j in range(len(self.people_list)):
+                dis = distance(self.people_list[i], self.people_list[j])
+                if dis < 3 and dis is not 0:
+                    neighbour[i] = dis
+            if len(neighbour) < 5:
+                for k in neighbour.keys():
+                    W15.append(self.people_list[k][0] - self.people_list[i][0])
+                    W610.append(self.people_list[k][1] - self.people_list[1])
+                    W1115.append(self.velocity_list[k][0] - self.velocity_list[k][0])
+                    W1620.append(self.velocity_list[k][1] - self.velocity_list[k][1])
+                for k in range(5 - len(neighbour)):
+                    W15.append(0)
+                    W610.append(0)
+                    W1115.append(0)
+                    W1620.append(0)
+            else:
+                for k in sorted(neighbour, key=neighbour.__getitem__):
+                    W15.append(self.people_list[k][0] - self.people_list[i][0])
+                    W610.append(self.people_list[k][1] - self.people_list[1])
+                    W1115.append(self.velocity_list[k][0] - self.velocity_list[k][0])
+                    W1620.append(self.velocity_list[k][1] - self.velocity_list[k][1])
+            datain.extend(W15)
+            datain.extend(W610)
+            datain.extend(W1115)
+            datain.extend(W1620)
+
+            predict = np.array([datain], dtype=np.float32)
+            predict = torch.from_numpy(predict)
+            predict = Variable(predict)
+            predict = model(predict)
+            predict = predict.data.numpy().tolist() # [[1, 2]]
+            new_velocity = predict[0]
+
+            print(new_velocity)
+
+            a = self.accelerate(i, e) * self.const_number
+            a[0] = (a[0] if abs(a[0]) < 100 else np.sign(a[0]) * 100) + np.random.randint(-50, 51)
+            a[1] = (a[1] if abs(a[1]) < 100 else np.sign(a[1]) * 100) + np.random.randint(-50, 51)
+            # print(a)
+            print_n = self.print_n  # and i == 3
+            if print_n:
+                print(i, "th:", " accelerate:", a, "e: ", e)
+                print("old_p: ", self.people_list[i])
+                print("old_v: ", self.velocity_list[i])
+
+            new_people_list.append(self.people_list[i] + self.t_gap * self.velocity_list[i])  # v0t + 1/2 * a * t**2
+
+            if print_n:
+                print("new_p: ", new_people_list[i])
+            new_velocity_list.append(new_velocity)  # at + v0
+
+
+            if print_n:
+                print("new_v: ", new_velocity_list[i])
+            for x, y in self.exit_list:
+                if x == math.floor(new_people_list[i][0]) and y == math.floor(new_people_list[i][1]):
+                    print([math.floor(new_people_list[i][0]), math.floor(new_people_list[i][1])])
+                    arrive_list.append(i)
+        arrive_people_list = self.people_list[arrive_list]
+        new_people_list = np.array(new_people_list)
+        new_velocity_list = np.array(new_velocity_list)
+        self.people_list = np.delete(new_people_list, arrive_list, axis=0)
+        self.velocity_list = np.delete(new_velocity_list, arrive_list, axis=0)
+        self.color_list = np.delete(self.color_list, arrive_list, axis=0)
+        # self.velocity_list = np.delete(self.velocity_list, arrive_list, axis=0)
+        return self.people_list, arrive_people_list, arrive_list
+
+
+
