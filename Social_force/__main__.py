@@ -44,7 +44,7 @@ if __name__ == "__main__":
     #                                                                                    exitDescribe, peopleDescribe)
 
     thickness = 5
-    convection_mode = False
+    convection_mode = True
     if convection_mode:
         sizeX, sizeY, wallDescribe, exitDescribe, peopleDescribe, mode, bound, exit_point = convectionMap.getDes()
     else:
